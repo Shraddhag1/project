@@ -1,0 +1,355 @@
+#Prcat 1:
+
+1st sqlplus
+
+Enter user-name: scott
+Enter password:tiger
+
+connect scott/tiger@shraddha;      # shraddha database name  pass:shraddha
+
+
+create table table1(empid number(5),empname varchar2(20));
+
+insert into table1 values(1,'shraddha');
+insert into table1 values(2,'kotesh');
+
+select * from table1;
+
+commit;
+
+#2nd sqlplus
+
+Enter user-name: scott
+Enter password:tiger
+
+connect scott/tiger@siddhi;      # siddhi database name    password: siddhi
+connect system;
+enter password:siddhi    # pass same as database pass
+
+grant all privileges to scott;
+
+create database link sdb connect to scott identified by tiger using 'shraddha';
+
+ select * from table1@sdb;
+======================================================================================
+
+#prac2: perform in sql plus
+#Managing the Oracle Instance
+#a.start and stop the oracle database and components
+# starting up
+
+SQL> STARTUP;
+ORACLE instance started.
+
+
+# shutting the oracle instance
+SQL> SHUTDOWN ABORT;
+ORACLE instance shut down.
+
+# starting up again (part of the process)
+SQL> STARTUP;
+ORACLE instance started.
+
+
+# Creating user
+SQL> CREATE USER HUSSAIN IDENTIFIED BY HUS;
+
+User created.
+
+# Verifying the presence of user in DB
+SQL> SELECT USERNAME FROM DBA_USERS;
+
+
+# modify the user by its alias by HUS10
+SQL> ALTER USER HUSSAIN IDENTIFIED BY HUS10;
+
+User altered.
+
+# repeate 
+SQL> SELECT USERNAME FROM DBA_USERS;
+
+
+# drop user hussain from DB
+SQL> DROP USER HUSSAIN CASCADE;
+
+User dropped.
+
+# verifying the droped user from DB
+SQL> SELECT USERNAME FROM DBA_USERS;
+=====================================================================================
+#Pract 3
+# Connected to SQL DB
+C:\Users\admin>sqlplus / as sysdba;
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Oct 6 11:08:40 2025
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+Connected.
+
+# starting up
+SQL> STARTUP;
+ORACLE instance started.
+
+
+# shutting the oracle instance
+SQL> SHUTDOWN ABORT;
+ORACLE instance shut down.
+
+# starting up again (part of the process)
+SQL> STARTUP;
+ORACLE instance started.
+
+
+# Creating user
+SQL> CREATE USER HUSSAIN IDENTIFIED BY HUS;
+
+User created.
+
+# Verifying the presence of user in DB
+SQL> SELECT USERNAME FROM DBA_USERS;
+
+
+# modify the user by its alias by HUS10
+SQL> ALTER USER HUSSAIN IDENTIFIED BY HUS10;
+
+User altered.
+
+# repeate 
+SQL> SELECT USERNAME FROM DBA_USERS;
+
+
+# drop user hussain from DB
+SQL> DROP USER HUSSAIN CASCADE;
+
+User dropped.
+
+# verifying the droped user from DB
+SQL> SELECT USERNAME FROM DBA_USERS;
+
+
+
+---------------------------------------------------------------------------------------
+#pract4 #run this code in sql plus
+
+#Managing Schema Objects
+#a.Create and modify tables
+
+create table employees(employee_id number primary key,first_name varchar2(10), last_name varchar2(10), hire_date date ,salary number(10,2));
+
+alter table employees add(email varchar2(10));
+
+alter table employees modify(salary number(12,2));
+
+drop table employees;
+
+#b.Define constraint
+create table dept1(dept_id number primary key,dept_name varchar2(20) unique,manager_id number,constraint fk_manager foreign key(manager_id) references employees(employee_id));
+
+create table dept2(dept_id number,dept_name varchar2(20) , manager_id number);
+
+alter table dept2 add constraint pk_dept2 primary key (dept_id);
+
+alter table dept2 add constraint uq_dept2_name unique(dept_name);
+
+#view the columns and content of a table
+desc employees;
+
+insert into employees values(1,'John','Deo','25-Jun-2022',6000);
+
+insert into employees values(2,'Jane','Smith','02-July-2023',6000);
+
+insert into employees values(3,'Robert','Johnson','12-Jan-2022',6000);
+
+insert into employees values(4,'Emily','Davis','10-Feb-2023',6000);
+
+insert into employees values(5,'Stella','Grace','06-Apr-2022',6000);
+
+select * from employees;
+
+select * from employees where salary > 5000;
+
+select first_name,salary from employees;
+
+=========================================================================================
+
+#pract5 run code in sql 
+
+#a.monitor and administer undo
+SELECT name, value  FROM v$parameter WHERE name LIKE 'undo%';
+
+ SELECT
+  2  a.tablespace_name,
+  3  a.bytes / 1024 / 1024 AS size_mb,
+  4  b.bytes / 1024 / 1024 AS used_mb,
+  5  (a.bytes - NVL(b.bytes,0)) / 1024 / 1024 AS free_mb
+  6  FROM
+  7  dba_data_files a,
+  8  (SELECT SUM(bytes) bytes, file_id
+  9  FROM dba_undo_extents
+ 10  WHERE status='ACTIVE'
+ 11  GROUP BY file_id) b
+ 12  WHERE a.file_id = b.file_id(+)
+ 13  AND a.tablespace_name IN (SELECT value FROM V$parameter WHERE name = 'undo_tablespace');
+
+
+
+ SELECT
+  2  s.sid,
+  3  s.serial#,
+  4  t.used_urec AS "UNDO Records",
+  5  t.used_ublk AS "UNDO Blocks",
+  6  s.username
+  7  FROM
+  8  v$transaction t,
+  9  v$session s
+ 10  WHERE
+ 11  t.ses_addr = s.saddr;
+
+
+SELECT file_name FROM dba_data_files WHERE tablespace_name = 'UNDOTBS1';
+
+#b.configure undo retention 
+
+SHOW PARAMETER undo_management;
+
+SHOW PARAMETER undo_retention;
+
+ALTER SYSTEM SET undo_retention =  1800 SCOPE=BOTH;
+
+SHOW PARAMETER undo_retention;
+
+===========================================================================================
+#prac6: run code in cmd
+
+lsnrctl status LISTENER1
+
+lsnrctl stop LISTENER1
+
+lsnrctl start LISTENER1
+
+CREATE DATABASE LINK HK CONNECT To scott IDENTIFIED BY tiger USING '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.10.192)(PORT=1521)(CONNECT_DATA=(SERVICE_NAME=sanika)))';
+
+
+========================================================================================S
+# Pract:7
+#performing Databases backups
+
+#a.RMAN full database backup
+sqlplus / as sysdba
+
+select log_mode from v$database;
+
+shutdown mount;
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP MOUNT;
+
+ALTER DATABASE ARCHIVELOG;
+
+select log_mode from v$database;
+
+alter database open;
+
+#open another cmd and paste below code 
+mkdir C:\app\oracle\backup
+
+rman target /
+
+BACKUP DATABASE FORMAT 'C:\app\oracle\backup\full_backup_%U'; 
+
+#b.incremental backup
+
+BACKUP INCREMENTAL LEVEL 1 DATABASE FORMAT'C:\app\oracle\backup\incremental_backup_%U';
+
+#c.archivelog backup 
+
+select log_mode from v$database;
+
+shutdown mount;
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP MOUNT;
+
+#if error detect then open cmd-----run as administarter
+rman target /
+
+
+BACKUP ARCHIVELOG ALL FORMAT 'C:\app\oracle\backup\arch_backup_%U';
+
+#d.RMAN backup of control file and SPFILE 
+#open cmd--run as administrator and run below codes
+
+BACKUP CURRENT CONTROLFILE FORMAT 'C:\app\oracle\backup\controlfile_backup_%U'; 
+
+
+BACKUP CURRENT CONTROLFILE FORMAT 'C:\app\oracle\backup\controlfile_backup_%U'; 
+
+#e.RMAN backup with compression
+#open cmd -- run as administrator and run below codes
+
+BACKUP AS COMPRESSED BACKUPSET DATABASE FORMAT 'C:\app\oracle\backup\compressed_full_backup_%U'; 
+
+#f.validating backup
+#open cmd--run as administrator then paste above code
+
+rman target /
+
+RESTORE DATABASE VALIDATE;
+
+RESTORE ARCHIVELOG ALL VALIDATE; 
+
+#g.Scheduling backup using RMAN
+#open cmd -- run as administrator 
+BACKUP DATABASE PLUS ARCHIVELOG; 
+
+
+BEGIN  
+DBMS_SCHEDULER.create job (  
+job name => 'backup_job',  
+job_type => 'EXECUTABLE',  
+job_action  => '/u01/app/oracle/backup/backup_database.rcv'  
+start_date =>   SYSTIMESTAMP,  
+repeat_interval =>'FREQ-DAILY; BYHOUR=22; BYMINUTE=0', 
+enabled => TRUE  
+);  
+END 
+/ 
+
+=========================================================
+pract 8:
+
+#parc8 - run code in sql plus 
+#performin databse recovery
+to create datafile
+
+sqlplus / as sysdba
+
+SELECT name FROM v$datafile; # to check the locations 
+
+create tablespace mynewtablespace
+  2  DATAFILE 'C:\app\admin\oradata\oracle1\mynewdatafile.dbf' SIZE 100M
+  3  AUTOEXTEND ON NEXT 10M MAXSIZE 1G;
+
+#in cmd 
+rman target/
+
+backup database;
+
+SELECT file_name, tablespace_name
+  2  FROM dba_data_files
+  3  WHERE file_name LIKE '%MYNEWDATAFILE.DBF';
+
+Shutdown immediate;
+
+exit;
+
+cd C:\app\admin\oradata\oracle1
+
+del MYNEWDATAFILE.DBF
+
+
+
+
